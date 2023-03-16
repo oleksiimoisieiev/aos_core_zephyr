@@ -37,7 +37,7 @@ include_directories(app PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/prebuilt)
 
 target_sources(
     app PRIVATE src/main.cpp src/logger/logger.cpp src/app/app.cpp src/cmclient/cmclient.cpp src/runner/runner.cpp
-                src/storage/storage.cpp src/domain_bins.S
+                src/storage/storage.cpp src/domd_cfg.c src/domain_bins.S
 )
 
 # ######################################################################################################################

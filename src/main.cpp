@@ -67,13 +67,17 @@ static void prepare_configs()
 
 } /* extern "C" */
 #endif /* DEBUG */
-
+extern struct xen_domain_cfg domd_cfg;
 int main(void)
 {
     printk("*** Aos zephyr application: %s ***\n", AOS_ZEPHYR_APP_VERSION);
     printk("*** Aos core library: %s ***\n", AOS_CORE_VERSION);
 
 	prepare_configs();
+
+    int rc = domain_create(&domd_cfg, 1);
+    if (rc)
+	printk("failed to create domain (%d)\n", rc);
 
     return 0;
 }

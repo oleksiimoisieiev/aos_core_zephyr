@@ -6,6 +6,13 @@
 
 #include <zephyr/toolchain.h>
 
+.section .data.img_ipl,"a"
+GDATA(__img_ipl_start)
+GDATA(__img_ipl_end)
+__img_ipl_start:
+.incbin	 "ipl.bin"
+__img_ipl_end:
+
 .section .data.img_unikraft,"a"
 
 GDATA(__img_unikraft_start)
