@@ -75,12 +75,5 @@ int main(void)
 
 	prepare_configs();
 
-    Logger::Init();
-
-    auto& app = App::Get();
-
-    auto err = app.Init();
-    __ASSERT(err.IsNone(), "Error initializing application: %s", err.ToString());
-
     return 0;
 }
