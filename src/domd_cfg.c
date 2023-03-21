@@ -5,6 +5,7 @@
  */
 
 #include <domain.h>
+#include <string.h>
 #include <zephyr/xen/public/domctl.h>
 
 static char *domd_dtdevs[] = {
@@ -376,6 +377,8 @@ static uint32_t domd_irqs[] = {
 
 extern char __img_ipl_start[];
 extern char __img_ipl_end[];
+extern char __dtb_ipl_start[];
+extern char __dtb_ipl_end[];
 
 static int load_ipl_image(uint8_t *buf, size_t bufsize,
 			  uint64_t image_load_offset, void *image_info)
@@ -417,6 +420,6 @@ struct xen_domain_cfg domd_cfg = {
 	.get_image_size = get_ipl_image_size,
 	.image_info = NULL,
 
-	.dtb_start = NULL,
-	.dtb_end = NULL,
+	.dtb_start = __dtb_ipl_start,
+	.dtb_end = __dtb_ipl_end,
 };

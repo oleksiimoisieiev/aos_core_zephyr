@@ -13,6 +13,14 @@ __img_ipl_start:
 .incbin	 "ipl.bin"
 __img_ipl_end:
 
+.section .data.dtb_ipl,"a"
+GDATA(__dtb_ipl_start)
+GDATA(__dtb_ipl_end)
+__dtb_ipl_start:
+.align 8
+.incbin	 "ipl.dtb"
+__dtb_ipl_end:
+
 .section .data.img_unikraft,"a"
 
 GDATA(__img_unikraft_start)
