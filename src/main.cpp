@@ -14,6 +14,7 @@
 #include "app/app.hpp"
 #include "logger/logger.hpp"
 #include "version.hpp"
+#include <vch.h>
 
 #if defined(DEBUG)
 extern "C" {
@@ -70,14 +71,50 @@ static void prepare_configs()
 extern struct xen_domain_cfg domd_cfg;
 int main(void)
 {
+       char tmp[64] = { 0 };
+       struct vch_handle srv, cli;
+       int rc;
+       const char msg1[] = "sample dom0 message 1";
+       const size_t msg1_sz = sizeof(msg1);
+ 
     printk("*** Aos zephyr application: %s ***\n", AOS_ZEPHYR_APP_VERSION);
     printk("*** Aos core library: %s ***\n", AOS_CORE_VERSION);
 
 	prepare_configs();
 
-    int rc = domain_create(&domd_cfg, 1);
-    if (rc)
-	printk("failed to create domain (%d)\n", rc);
 
+    rc = domain_create(&domd_cfg, 1);
+    if (rc) {
+	printk("failed to create domain (%d)\n", rc);
+	return rc;
+    }
+
+    rc = vch_open(1, "sample_vchan", 128, 256, &srv);
+    printk("vch_open() = %d\n", rc);
+    rc = vch_write(&srv, msg1, msg1_sz);
+    printk("vch_write() = %d\n", rc);
+
+//       rc = vch_connect(0, "sample_vchan", &cli);
+
+//       printk("vch_connect() = %d\n", rc);
+//       rc = vch_read(&cli, tmp, 4);
+//       printk("vch_read() = %d\n", rc);
+//       printk("tmp = '%s'\n", tmp);
+
+//       vch_close(&cli);
+	srv.blocking = true;
+	for (int i = 0; i < 100; i++) {
+		rc = snprintf(tmp, sizeof(tmp), "sample msg #%d !", i);
+		rc = vch_write(&srv, tmp, rc);
+		printk("vch_write() = %d\n", rc);
+		//usleep(USEC_PER_SEC * 2);
+		rc = vch_read(&srv, tmp, sizeof(tmp) - 1);
+		if (rc > 0) {
+			tmp[rc] = '\0';
+			printk("[%s]\n", tmp);
+		} else
+			printk("vch_read() = %d\n", rc);
+	}
+    vch_close(&srv);
     return 0;
 }
