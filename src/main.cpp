@@ -4,8 +4,6 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-#define DEBUG
-
 #include <zephyr/sys/__assert.h>
 #include <zephyr/sys/printk.h>
 
@@ -14,7 +12,7 @@
 #include "app/app.hpp"
 #include "logger/logger.hpp"
 #include "version.hpp"
-
+#define DEBUG
 #if defined(DEBUG)
 extern "C" {
 #include <zephyr/storage/flash_map.h>
@@ -167,7 +165,7 @@ static void prepare_configs()
 }
 
 } /* extern "C" */
-#endif /* DEBUG */
+#endif /* CONFIG_DEBUG */
 
 int main(void)
 {
