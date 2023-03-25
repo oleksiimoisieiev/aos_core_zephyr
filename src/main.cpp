@@ -17,12 +17,101 @@
 extern "C" {
 #include <zephyr/storage/flash_map.h>
 
-#include <storage.h>
 #include <xen_dom_mgmt.h>
 #include <xrun.h>
-
+#define LFS_NAME_MAX 255
 #define PARTITION_NODE \
 	DT_NODELABEL(storage)
+
+int lsdir(const char *path)
+{
+	int res;
+	struct fs_dir_t dirp;
+	static struct fs_dirent entry;
+
+	if (!path) {
+		printk("FAIL: Invalid input parameter");
+		return -EINVAL;
+	}
+
+	fs_dir_t_init(&dirp);
+
+	/* Verify fs_opendir() */
+	res = fs_opendir(&dirp, path);
+	if (res) {
+		printk("FAIL: Error opening dir %s [%d]", path, res);
+		return res;
+	}
+
+	printk("Listing dir %s ...", path);
+	for (;;) {
+		/* Verify fs_readdir() */
+		res = fs_readdir(&dirp, &entry);
+
+		/* entry.name[0] == 0 means end-of-dir */
+		if (res || entry.name[0] == 0) {
+			if (res < 0) {
+				printk("FAIL: Error reading dir [%d]", res);
+			}
+			break;
+		}
+
+		if (entry.type == FS_DIR_ENTRY_DIR) {
+			printk("[DIR ] %s", entry.name);
+		} else {
+			printk("[FILE] %s (size = %zu)",
+					entry.name, entry.size);
+		}
+	}
+
+	/* Verify fs_closedir() */
+	fs_closedir(&dirp);
+
+	return res;
+}
+
+int write_file(const char *path, const char *name,
+	       char *buf, size_t size)
+{
+	struct fs_file_t file;
+	int rc, ret;
+	char fname[LFS_NAME_MAX];
+
+	if (!path || !name || !buf) {
+		printk("FAIL: Invalid input parameters");
+		return -EINVAL;
+	}
+
+        rc = snprintf(fname, LFS_NAME_MAX, "%s/%s", path, name);
+	if (rc <= 0) {
+		printk("FAIL: Unable to form file path: %d", rc);
+		return rc;
+	}
+
+	fs_file_t_init(&file);
+	rc = fs_open(&file, fname, FS_O_CREATE | FS_O_WRITE);
+	if (rc < 0) {
+		printk("FAIL: open %s: %d", fname, rc);
+		return rc;
+	}
+
+	rc = fs_write(&file, buf, size);
+	if (rc < 0) {
+		printk("FAIL: write %s: %d", fname, rc);
+		goto out;
+	}
+
+	printk("%s write file size %lu: [wr:%d]", fname, size, rc);
+
+ out:
+	ret = fs_close(&file);
+	if (ret < 0) {
+		printk("FAIL: close %s: %d", fname, ret);
+		return ret;
+	}
+
+	return (rc < 0 ? rc : 0);
+}
 
 static int littlefs_flash_erase(unsigned int id)
 {
