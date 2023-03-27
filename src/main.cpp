@@ -212,7 +212,7 @@ char json_msg[] = "{"
 			"\"parameters\" : [ \"port=8124\", \"hello world\" ]"
 		"}, "
 		"\"hwconfig\": { "
-			"\"devicetree\": \"uni.dtb\" "
+			"\"devicetree\": \"\" "
 		"} "
 	"} "
 "}";
