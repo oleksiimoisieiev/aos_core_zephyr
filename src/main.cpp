@@ -19,6 +19,10 @@ extern "C" {
 
 #include <xen_dom_mgmt.h>
 #include <xrun.h>
+#include <domain.h>
+
+struct xen_domain_cfg domd_cfg;
+
 #define LFS_NAME_MAX 255
 #define PARTITION_NODE \
 	DT_NODELABEL(storage)
